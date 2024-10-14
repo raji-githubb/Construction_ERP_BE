@@ -1119,7 +1119,7 @@ class BidQualificationSerializer(serializers.ModelSerializer):
         model = BidQualification
         fields = "__all__"
 
-class TenderProposalManagementSerializer(serializers.ModelSerializer):
+class TenderProposalMa8001nagementSerializer(serializers.ModelSerializer):
     class Meta:
         model = TenderProposalManagement
         fields = "__all__"
