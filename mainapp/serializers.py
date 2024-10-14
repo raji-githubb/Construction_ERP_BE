@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import *
+from mainapp.models import*
 
 #  ms setup serializer
 class MSSerializer(serializers.Serializer):

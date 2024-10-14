@@ -1,6 +1,6 @@
 import inspect
 import random
-from .models import *
+from mainapp.models import*
 import json
 import requests
 from datetime import datetime

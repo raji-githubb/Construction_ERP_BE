@@ -1,5 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.models import (
+    AbstractBaseUser,
+    PermissionsMixin,
+    BaseUserManager,
+)
 
 # MS setup models
 class MSRegistration(models.Model):
@@ -37,14 +43,57 @@ class MsToModuleMapping(models.Model):
     def str(self):
         return str(self.module_id)	
 
-class User(models.Model):
-	first_name = models.CharField(max_length=30,)
-	middle_name = models.CharField(max_length=30,blank=True, null=True ,)
-	last_name = models.CharField(max_length=30,)
-	dob = models.DateField(blank=True, null=True)
-	phone_number = models.PositiveBigIntegerField(blank=True, null=True)
+class Role(models.Model):
+	name = models.CharField(max_length=100,)
+	description = models.TextField(blank=True, null=True)
+	created_by=models.ForeignKey('User',on_delete=models.CASCADE,related_name='Rolecreated_by')
+	updated_by=models.ForeignKey('User',on_delete=models.CASCADE,related_name='Roleupdated_by')
+	created_at=models.DateTimeField(auto_now_add=True)
+	updated_at=models.DateTimeField(auto_now=True)
 	def __str__(self):
-		return self.first_name
+		return self.name
+
+class CustomUserManager(BaseUserManager):
+    def create_superuser(self, email, password, **other_fields):
+        other_fields.setdefault("is_staff", True)
+        other_fields.setdefault("is_superuser", True)
+        other_fields.setdefault("is_active", True)
+        return self.create_user(email, password, **other_fields)
+	
+    def create_client(self, email, password, **other_fields):
+        other_fields.setdefault("is_staff", True)
+        other_fields.setdefault("is_client", True)
+        other_fields.setdefault("is_active", True)
+        return self.create_user(email, password, **other_fields)
+	
+    def create_user(self, email, password, **other_fields):
+        if not email:
+            raise ValueError(_("You must provide a valid email address"))
+
+        email = self.normalize_email(email)
+        user = self.model(email=email, **other_fields)
+        user.set_password(password)
+        user.save()
+        return user
+    
+class User(AbstractBaseUser, PermissionsMixin):
+	first_name = models.CharField(max_length=100, blank=False, null=True)
+	last_name = models.CharField(max_length=100, blank=False, null=True)
+	email = models.EmailField(_("email address"), unique=True)
+	phone_no = models.CharField(max_length=15, blank=False, null=False)
+	password=models.CharField(max_length=100, blank=False, null=False)
+	created_at = models.DateTimeField(auto_now_add=True)
+	updated_at = models.DateTimeField(auto_now=True)
+	is_staff = models.BooleanField(default=False)
+	is_client = models.BooleanField(default=False)
+	is_active = models.BooleanField(default=True)
+	roles = models.ForeignKey(Role, on_delete=models.CASCADE,blank=True, null=True)
+	objects = CustomUserManager()
+	REQUIRED_FIELDS = ["first_name"]
+	USERNAME_FIELD = "email"
+	def __str__(self) -> str:
+		return self.email
+
 
 class AssetCategory(models.Model):
 	name = models.CharField(max_length=255,)
@@ -263,15 +312,7 @@ class RFPRFQ(models.Model):
 	def __str__(self):
 		return self.title
 
-class Role(models.Model):
-	name = models.CharField(max_length=100,)
-	description = models.TextField(blank=True, null=True)
-	created_by=models.ForeignKey(User,on_delete=models.CASCADE,related_name='Rolecreated_by')
-	updated_by=models.ForeignKey(User,on_delete=models.CASCADE,related_name='Roleupdated_by')
-	created_at=models.DateTimeField(auto_now_add=True)
-	updated_at=models.DateTimeField(auto_now=True)
-	def __str__(self):
-		return self.name
+
 
 class ScoringCriteria(models.Model):
 	name = models.CharField(max_length=255,)

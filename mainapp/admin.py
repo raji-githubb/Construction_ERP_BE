@@ -1,9 +1,9 @@
 from django.contrib import admin
-from .models import *
+from mainapp.models import*
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ['first_name', 'middle_name', 'last_name', 'dob', 'phone_number']
+    list_display = ['first_name', 'last_name']
     
 @admin.register(AssetCategory)
 class AssetCategoryAdmin(admin.ModelAdmin):

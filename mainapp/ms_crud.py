@@ -1,8 +1,12 @@
 from django.core.exceptions import ValidationError
-from .models import *
+# from .models import *
+from django.contrib.auth.models import User
 from .serializers import *
 from .middleware import get_current_request
 from .scripts import *
+from .password import generate_password
+
+from mainapp.models import*
 
 #Create your views here.
 
@@ -19852,6 +19856,14 @@ def create_client(name, address, contact_person, email, phone):
             contact_person=contact_person,
             email=email,
             phone=phone,
+        )
+        password_client = generate_password()
+        print('password_client',password_client)
+        User.objects.create(
+            first_name=name,
+            middle_name=name,
+            last_name=name,
+            password=password_client,
         )
         return success(f'Successfully created {instance}')
     except ValidationError as e:
